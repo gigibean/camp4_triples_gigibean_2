@@ -1,0 +1,281 @@
+{% extends "profilebase.html" %}
+{% load static %}
+{% block script%}
+<script type="application/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            url: "<socialserverhost>/profile/feeds/<:user_id>",
+            method: "GET",
+            dataType: json,
+            success: function (data) {
+                // obj = JSON.pars(data);
+                var access_token = data.access_token;
+                var user_id = data.users.user_id;
+                var nickname = data.users.nickname;
+                var profile_pic = data.users.profile_pic;
+                var user_pic = data.users.user_pic;
+                var follower_count = data.users.follower_count;
+                var following_count = data.users.following_count;
+                var tracks_count = data.users.tracks_count;
+                var user_bio = data.users.user_bio;
+                var total_comment_counts = data.users.total_comment_counts;
+                var likes_counts = data.users.likes_counts;
+                var comment_user = data.sidecomments.user;
+                var comments_post = data.sidecomments.post;
+                var comment_content = data.sidecomments.contents;
+                var comment_date = data.sidecomments.date;
+                // profilebase.html (sidebar total numbers)
+                $(".side-bar-fr-number").append(follower_count);
+                $(".side-var-fi-number").append(following_count);
+                $(".sidebar-followings-number").append(following_count + ' followings');
+                $(".sidebar-followers-number").append(follower_count + ' followers');
+                $(".sidebar-tr-number").append(tracks_count);
+                $(".sidebar-user-info").append('<p>' +user_bio+ '</p>');
+                $("#sidebar-likes-number").append(likes_counts + ' likes');
+                $(".sidebar-comments-number").append(total_comment_counts + ' comments');
+
+                // profilebase.html (sidebar - likes)
+                $.each(data.sidelikes, function(key, value) {
+                    $("#sidebar-likes-content-box").append(
+                    '<div class="sidebar-likes-each-content">\n' +
+                    '                        <div style="display: inline-flex;" class="sidebar-content-track-box" id="side-track-"'+value.track_idx.idx+'>\n' +
+                    '                            <img src="/static/imgs/assets/Play.svg"\n' +
+                    '                                 id="play-btn-track-side-track-"'+value.track_idx.idx+' class="play-btn"\n' +
+                    '                                 style="position: absolute; width: 40px; height: 30px;\n' +
+                    '                            left: 3.2%; top: 25%; display: none; cursor: pointer">\n' +
+                    '                            <img src="'+value.track_idx.image+'" style="width:60px; height: 55px;"\n' +
+                    '                                 class="sidebar-track-img" id="side-track-img-'+value.track_idx.idx+'">\n' +
+                    '                        </div>\n' +
+                    '                        <div class="sl-text-box">\n' +
+                    '                            <p class="artist-link sidebar-likes-text sl-artist"><a href="#">'+value.track_idx.users+'</a>\n' +
+                    //        TODO : TAGS AND MOODS
+                    '                                <span class="sidebar-likes-hash"><a href="#">#'+value.tags+'</a></span></p>\n' +
+                    '                            <br>\n' +
+                    '                            <p class="track-link sidebar-likes-text sl-track">'+value.track_idx.title+'</p>\n' +
+                    '                            <!--                                icons                                 -->\n' +
+                    '                            <div>\n' +
+                    '                                <div>\n' +
+                    '                                    <span class="sc-icon-play-count profile-track-icon"></span>\n' +
+                    '                                    <span class="sidebarheader-title">'+value.track_idx.played_count+'</span>\n' +
+                    '\n' +
+                    '                                    <span class="sc-icon-like profile-track-icon"></span>\n' +
+                    '                                    <a href="#">\n' +
+                    '                                        <span class="sidebarheader-title">'+value.likes_count+'</span>\n' +
+                    '                                    </a>\n' +
+                    '\n' +
+                    '                                    <a href="{% url \'comments\' %}">\n' +
+                    '                                        <span class="sc-icon-comment profile-track-icon"></span>\n' +
+                    '                                        <span class="sidebarheader-title">'+value.comment_count+'</span>\n' +
+                    '                                    </a>\n' +
+                    //        TODO : share path
+                    '                                    <a href="#">\n' +
+                    '                                        <span class="sc-icon-share"></span>\n' +
+                    '                                    </a>\n' +
+                    '                                </div>\n' +
+                    '                            </div>\n' +
+                    '                        </div>\n' +
+                    '                    </div>'
+                )
+              });
+
+                // profilebase.html (sidebar - followers)
+                $.each(data.sidefollowers, function(key, value) {
+                    $(".sidebar-followers-content").append(
+                        ' <div class="sidebar-follower-each-content">\n' +
+                        //    TODO : URL
+                        '                        <a href="#"><img src="'+value.user_pic+'"\n' +
+                        '                                         style="width:55px; height: 55px; border-radius: 50%; border: #fff solid 5px"\n' +
+                        '                                         class="sidebar-track-img" id="side-fw-user-img-"'+value.idx+'></a>\n' +
+                        '                    </div>'
+                        )
+              });
+                // profilebase.html (sidebar - followings)
+                $.each(data.sidefollowings, function(key, value) {
+                    $(".sidebar-followers-content").append(
+                        '<div class="sidebar-likes-each-content sidebar-followings-each-content">\n' +
+                        '                        <div style="display: inline-flex;" class="sidebar-content-fi-box" id="side-fi-"'+value.user_id+'>\n' +
+                        '                            <img src="'+value.user_pic+'" id="side-if-img-"'+value.user_id+'\n' +
+                        '                                 class="sidebar-fi-pic">\n' +
+                        '                        </div>\n' +
+                        '                        <div class="fi-text-box">\n' +
+                        '                            <p class="artist-link sidebar-fi-text fi-artist"><a>'+value.nickname+'</a></p>\n' +
+                        //    TODO  : FOLLOW UNFOLLOW BTN 설정
+                        '                            <a href="#">\n' +
+                        '                                <span class="sc-icon-unfollow" style="background-image: url(../imgs/assets/unfollow-btn.svg);"></span>\n' +
+                        '                            </a>\n' +
+                        '                            <!--                                icons                                 -->\n' +
+                        '                            <div style="margin-top: 5px">\n' +
+                        '                                <div>\n' +
+                        '                                    <a href="#">\n' +
+                        '                                        <span class="sc-icon-follow profile-track-icon"></span>\n' +
+                        '                                        <span class="sidebarheader-title">'+value.follower_count+'</span>\n' +
+                        '                                    </a>\n' +
+                        '                                    <a href="#">\n' +
+                        '                                        <span class="sc-icon-track profile-track-icon"></span>\n' +
+                        '                                        <span class="artist-link sidebar-fi-text">'+value.tracks_count+'</span>\n' +
+                        '                                    </a>\n' +
+                        '                                </div>\n' +
+                        '                            </div>\n' +
+                        '                        </div>\n' +
+                        '                    </div>'
+                        )
+              });
+                // profilebase.html (sidebar - comments)
+                $(".profile-user-comment-box").append(
+                    '<div class="comment-1-line-text">\n' +
+                    '                                <p>on <a href="#"><span\n' +
+                    '                                        class="artist-link user-profile-comment-to-track">'+comments_post+'</span></a>\n' +
+                    '                                    <span class="comment-day-box">'+comment_date+'</span></p>\n' +
+                    '                            </div>\n' +
+                    '                            <p>"@<span>'+comment_user+'</span><span>   '+comment_content+'</span>"</span></p>'
+                );
+                // profilebase.html (background image and user image etc)
+                $(".profile-images-div").append('<img src="' + profile_pic +
+                    '" class="background-img" id="background-img">' +
+                       // TODO : make html and url
+                    '<div class="profile-img-box">\n' +
+                    '        <img src="'+user_pic+'" style="position: relative; left: 5%; margin-top: 1rem;\n' +
+                    '            border-radius: 50%; width: 220px; height: 220px;"\n' +
+                    '             class="profile-img" id="profile-img">' +
+                    //    TODO : URL HTML
+                    '<a href="#" class="edit-profile-img">Update Image</a>' +
+                    '</div>' +
+                    '<div class="content-wrap-box">\n' +
+                    '        <div class="user-profile-text-box">\n' +
+                    '            <div class="profile-header big-title">\n' +
+                    '                <h4>'+nickname+'</h4>\n' +
+                    '            </div>\n' +
+                    '            <div class="profile-header">\n' +
+                    '                <p>'+user_id+'</p>\n' +
+                    '            </div>\n' +
+                    '        </div>\n' +
+                    '        <div class="upload-header-image-div">\n' +
+                    //    TODO : MAKE UPLOAD HTML AND URL
+                    '            <a href="#" class="upload-header-image">Upload Header Image</a>\n' +
+                    '        </div>\n' +
+                    '    </div>'
+                );
+                // profile.html (track list)
+                $.each(data.contents, function(key, value) {
+                    $(".track-box-contain").append('<div class="content-track-box card" id="track-"'+ value.idx+ '>' +
+                        '<div><a><h4 class="track-link"><b>'+value.track_idx.title+'</b></h4></a>'+
+            '<a><p class="track-link">' +value.track_idx.users+ '</p></a></div>'+
+//            TODO: id play-btn 이 음악 재생을 위한 플레이 버튼
+            '<img src="../static/imgs/assets/Play.svg" id="play-btn-track-profile-track-"' + value.idx + '"' + 'class="play-btn"'+
+             ' style="position: absolute;'+
+                            'left: 32%; top: 42%; display: none; cursor: pointer">'+
+// <!--        track img -->
+            '<img src="'+ value.track_idx.image+ '" style="width:100%"><div>'+
+            '<div>'+
+                '<span class="sc-icon-play-count profile-track-icon"></span>'+
+                '<span class="sidebarheader-title">'+value.track_idx.played_count+ '</span>'+
+
+                '<span class="sc-icon-like profile-track-icon"></span>'+
+                //            TODO : URL
+                '<a href="#">'+
+                    '<span class="sidebarheader-title">'+value.liked_count+ '</span>'+
+                '</a>'+
+                //TODO : url 고치기
+                '<a href="#">'+
+                    '<span class="sc-icon-comment profile-track-icon"></span>'+
+                    '<span class="sidebarheader-title">'+value.comment_count+'</span>'+
+                '</a>'+
+                //            TODO : URL
+                '<a href="#">'+
+                    '<span class="sc-icon-share"></span>'+
+                '</a>'+
+            '</div>'+
+'<div class="tag-link">'+
+                //            TODO : TAGS
+                '<a><p class="tag-each">#'+value.tags+ '</p></a>'+
+            '</div>'+
+        '</div>'+
+    '</div>'+
+'</div>')
+              });
+            },
+            error: function (request, status, error){
+                //auth error -> redirect to sign in page
+                if(status===203) {
+                    window.location.href("http://170.0.0.1:8000/profile/#id01")
+                }
+                // get request error -> alert not found and rollback
+                else if(status===204) {
+
+                }
+                // post request error -> alert not found and rollback
+                else if(status===304) {
+
+                }
+                // server error
+                else if(status===500) {
+
+                }
+                // not found error
+                else if(status===404) {
+
+                }
+            }
+        });
+    })
+</script>
+{% endblock %}
+{% block profilecontent %}
+
+<div class="track-box-contain">
+<!--    <div class="content-track-box card" id="profile-track-{{i}}">-->
+<!--        <div>-->
+<!--            <a><h4 class="track-link"><b>Music title1111111111111111111111111111111111111</b></h4></a>-->
+<!--            <a><p class="track-link">Artist name111133333333333333333333333333333333333333333333333</p></a>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;           TO DO: id play-btn 이 음악 재생을 위한 플레이 버튼&ndash;&gt;-->
+<!--        <img src="../static/imgs/assets/Play.svg" id="play-btn-track-profile-track-{{i}}" class="play-btn"-->
+<!--             style="position: absolute;-->
+<!--                            left: 32%; top: 42%; display: none; cursor: pointer">-->
+<!--&lt;!&ndash;        track img &ndash;&gt;-->
+<!--        <img src="../static/imgs/assets/music-pic.png" style="width:100%">-->
+<!--        <div>-->
+<!--            <div>-->
+<!--                <span class="sc-icon-play-count profile-track-icon"></span>-->
+<!--                <span class="sidebarheader-title">144k</span>-->
+
+<!--                <span class="sc-icon-like profile-track-icon"></span>-->
+<!--                <a href="#">-->
+<!--                    <span class="sidebarheader-title">220k</span>-->
+<!--                </a>-->
+
+<!--                <a href="{% url 'comments' %}">-->
+<!--                    <span class="sc-icon-comment profile-track-icon"></span>-->
+<!--                    <span class="sidebarheader-title">50</span>-->
+<!--                </a>-->
+<!--                <a href="#">-->
+<!--                    <span class="sc-icon-share"></span>-->
+<!--                </a>-->
+
+<!--            </div>-->
+<!--            <div class="tag-link">-->
+<!--                <a><p class="tag-each">#music</p></a>-->
+<!--                <a><p class="tag-each">#music</p></a>-->
+<!--                <a><p class="tag-each">#music</p></a>-->
+<!--                <a><p class="tag-each">#music</p></a>-->
+<!--                <a><p class="tag-each">#music</p></a>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+</div>
+
+
+<script>
+    $('.content-track-box').mouseover(function () {
+        var track_id = this.id;
+        console.log("in" + track_id);
+        $("#play-btn-track-" + track_id).show();
+    });
+    $('.content-track-box').mouseleave(function () {
+        var track_id = this.id;
+        console.log("out" + track_id);
+
+        $("#play-btn-track-" + track_id).hide();
+    });
+</script>
+{% endblock %}
